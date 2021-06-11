@@ -30,12 +30,16 @@ class HomePage extends StatelessWidget {
                 color: Colors.red,
               ),
               onDismissed: (_) {
-                // To do: Eliminar producto
+                productProvider.destroy(productos[i].id!);
               },
               child: ListTile(
                 title: Text(productos[i].titulo!),
                 subtitle: Text(productos[i].precio),
-                onTap: () => Navigator.pushNamed(context, 'product'),
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  'product',
+                  arguments: productos[i],
+                ),
               ),
             ),
           );

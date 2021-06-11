@@ -15,37 +15,47 @@ class _ProductPageState extends State<ProductPage> {
   ProductsProvider productProvider = ProductsProvider();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text('Producto'),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.image),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.camera_alt),
-            ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.all(15),
-            child: Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  _nombreField(),
-                  _precioField(),
-                  _crearDisponible(),
-                  _crearBoton(),
-                ],
-              ),
+  Widget build(BuildContext context) {
+    final Product? prodData =
+        ModalRoute?.of(context)?.settings.arguments as Product?;
+
+    if (prodData != null) {
+      producto = prodData;
+      print(producto.toJson());
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Producto'),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.image),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.camera_alt),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(15),
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+                _nombreField(),
+                _precioField(),
+                _crearDisponible(),
+                _crearBoton(context),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _nombreField() => TextFormField(
         initialValue: producto.titulo,
@@ -76,8 +86,8 @@ class _ProductPageState extends State<ProductPage> {
         },
       );
 
-  Widget _crearBoton() => ElevatedButton(
-        onPressed: _submit,
+  Widget _crearBoton(context) => ElevatedButton(
+        onPressed: () => _submit(context),
         child: Container(
           width: 100,
           child: Row(
@@ -90,7 +100,7 @@ class _ProductPageState extends State<ProductPage> {
         ),
       );
 
-  _submit() {
+  _submit(context) {
     final currentState = formKey.currentState;
     if (currentState != null && currentState.validate()) {
       currentState.save();
@@ -99,6 +109,8 @@ class _ProductPageState extends State<ProductPage> {
       print(producto.disponible);
 
       productProvider.create(producto);
+
+      Navigator.pop(context);
     }
   }
 
