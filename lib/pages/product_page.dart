@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:patron_bloc/models/product_model.dart';
 import 'package:patron_bloc/providers/products_provider.dart';
 import 'package:patron_bloc/utils/utils.dart';
@@ -10,6 +13,7 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   final formKey = GlobalKey<FormState>();
+  File? foto;
 
   Product producto = Product();
   ProductsProvider productProvider = ProductsProvider();
@@ -29,11 +33,11 @@ class _ProductPageState extends State<ProductPage> {
         title: Text('Producto'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: _seleccionarFoto,
             icon: Icon(Icons.image),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: _tomarFoto,
             icon: Icon(Icons.camera_alt),
           ),
         ],
@@ -45,6 +49,7 @@ class _ProductPageState extends State<ProductPage> {
             key: formKey,
             child: Column(
               children: [
+                _showPhoto(),
                 _nombreField(),
                 _precioField(),
                 _crearDisponible(),
@@ -104,11 +109,10 @@ class _ProductPageState extends State<ProductPage> {
     final currentState = formKey.currentState;
     if (currentState != null && currentState.validate()) {
       currentState.save();
-      print(producto.titulo);
-      print(producto.valor);
-      print(producto.disponible);
 
       productProvider.create(producto);
+
+      showSnackbar('Datos guardados');
 
       Navigator.pop(context);
     }
@@ -123,5 +127,60 @@ class _ProductPageState extends State<ProductPage> {
         setState(() {});
       },
     );
+  }
+
+  void showSnackbar(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 2),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Widget _showPhoto() {
+    if (producto.fotourl != null) {
+      return Container();
+    }
+
+    if (foto == null) {
+      return Image(
+        image: AssetImage('assets/no-image.png'),
+        height: 300,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Image.file(
+      foto!,
+      height: 300,
+      fit: BoxFit.cover,
+    );
+  }
+
+  void _seleccionarFoto() {
+    _pickImage(ImageSource.gallery);
+  }
+
+  void _pickImage(source) async {
+    final _picker = ImagePicker();
+
+    try {
+      final pickedFile = await _picker.getImage(source: source);
+      if (pickedFile == null) {
+        producto.fotourl = null;
+        return;
+      }
+
+      foto = File(pickedFile.path);
+
+      setState(() {});
+    } catch (PlatformException) {
+      showSnackbar('No hay cámaras disponibles en el dispositivo');
+    }
+  }
+
+  void _tomarFoto() {
+    _pickImage(ImageSource.camera);
   }
 }

@@ -26,7 +26,10 @@ class ProductsProvider {
 
     final url = Uri.parse('$_url/products/${product.id}.json');
 
-    final response = await http.put(url, body: productToJson(product));
+    final productMap = product.toJson();
+    productMap.remove('id');
+
+    final response = await http.put(url, body: json.encode(productMap));
 
     final decodedData = json.decode(response.body);
 
