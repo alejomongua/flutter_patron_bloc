@@ -1,15 +1,28 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 import 'package:patron_bloc/models/product_model.dart';
 import 'package:http/http.dart' as http;
 
+// El archivo secrets es ignorado por git, en él únicamente hay definidas tres
+// constantes: FIREBASE_URL, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET y
+// CLOUDINARY_CLOUD_ID
+import 'package:patron_bloc/secrets.dart';
+
 class ProductsProvider {
-  final String _url = 'https://flutter-dev-a10cf-default-rtdb.firebaseio.com';
+  // Las constantes están definidas en el archivo secrets que no se encuentra
+  // en el repo
+  final Cloudinary _cloudinary = Cloudinary(
+    CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET,
+    CLOUDINARY_CLOUD_ID,
+  );
 
   Future<bool> create(Product product) async {
     if (product.id != null) return await update(product);
 
-    final url = Uri.parse('$_url/products.json');
+    final url = Uri.parse('$FIREBASE_URL/products.json');
 
     final response = await http.post(url, body: productToJson(product));
 
@@ -24,7 +37,7 @@ class ProductsProvider {
   Future<bool> update(Product product) async {
     if (product.id == null) return await create(product);
 
-    final url = Uri.parse('$_url/products/${product.id}.json');
+    final url = Uri.parse('$FIREBASE_URL/products/${product.id}.json');
 
     final productMap = product.toJson();
     productMap.remove('id');
@@ -40,11 +53,13 @@ class ProductsProvider {
   }
 
   Future<List<Product>> index() async {
-    final url = Uri.parse('$_url/products.json');
+    final url = Uri.parse('$FIREBASE_URL/products.json');
 
     final response = await http.get(url);
 
-    final Map<String, dynamic> decodedData = json.decode(response.body);
+    final Map<String, dynamic>? decodedData = json.decode(response.body);
+
+    if (decodedData == null) return [];
 
     final List<Product> resultado = [];
 
@@ -61,7 +76,7 @@ class ProductsProvider {
   }
 
   Future<bool> destroy(String id) async {
-    final url = Uri.parse('$_url/products/$id.json');
+    final url = Uri.parse('$FIREBASE_URL/products/$id.json');
 
     final response = await http.delete(url);
 
@@ -71,5 +86,22 @@ class ProductsProvider {
     print(decodedData);
 
     return true;
+  }
+
+  Future<String?> uploadImage(File file) async {
+    final response = await _cloudinary.uploadFile(
+      filePath: file.path,
+      resourceType: CloudinaryResourceType.image,
+      folder: '/products',
+    );
+
+    if (!response.isSuccessful) {
+      return null;
+    }
+
+    print('Uploaded image');
+    print(response.secureUrl);
+
+    return response.secureUrl;
   }
 }

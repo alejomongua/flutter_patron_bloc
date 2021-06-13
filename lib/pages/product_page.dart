@@ -105,10 +105,16 @@ class _ProductPageState extends State<ProductPage> {
         ),
       );
 
-  _submit(context) {
+  _submit(context) async {
     final currentState = formKey.currentState;
     if (currentState != null && currentState.validate()) {
       currentState.save();
+
+      if (foto != null) {
+        print('Si hay imagen');
+        producto.fotourl = await productProvider.uploadImage(foto!);
+        print(producto.fotourl);
+      }
 
       productProvider.create(producto);
 
@@ -173,6 +179,9 @@ class _ProductPageState extends State<ProductPage> {
       }
 
       foto = File(pickedFile.path);
+
+      print('Imagen seleccionada');
+      print(foto!.path);
 
       setState(() {});
     } catch (PlatformException) {

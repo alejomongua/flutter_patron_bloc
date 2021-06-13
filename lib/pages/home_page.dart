@@ -22,6 +22,14 @@ class HomePage extends StatelessWidget {
 
           final productos = snapshot.data!;
 
+          if (productos.length == 0) {
+            return Center(
+              child: Container(
+                child: Text('Aún no se han registrado productos'),
+              ),
+            );
+          }
+
           return ListView.builder(
             itemCount: productos.length,
             itemBuilder: (_, i) => Dismissible(
