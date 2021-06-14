@@ -18,6 +18,8 @@ class _ProductPageState extends State<ProductPage> {
   Product producto = Product();
   ProductsProvider productProvider = ProductsProvider();
 
+  bool _guardando = false;
+
   @override
   Widget build(BuildContext context) {
     final Product? prodData =
@@ -92,7 +94,7 @@ class _ProductPageState extends State<ProductPage> {
       );
 
   Widget _crearBoton(context) => ElevatedButton(
-        onPressed: () => _submit(context),
+        onPressed: _guardando ? null : () => _submit(context),
         child: Container(
           width: 100,
           child: Row(
@@ -107,6 +109,8 @@ class _ProductPageState extends State<ProductPage> {
 
   _submit(context) async {
     final currentState = formKey.currentState;
+    _guardando = true;
+    setState(() {});
     if (currentState != null && currentState.validate()) {
       currentState.save();
 
@@ -145,20 +149,24 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Widget _showPhoto() {
-    if (producto.fotourl != null) {
-      return Container();
-    }
-
-    if (foto == null) {
-      return Image(
-        image: AssetImage('assets/no-image.png'),
+    if (foto != null) {
+      return Image.file(
+        foto!,
         height: 300,
         fit: BoxFit.cover,
       );
     }
 
-    return Image.file(
-      foto!,
+    if (producto.fotourl != null) {
+      return FadeInImage(
+        placeholder: AssetImage('assets/jar-loading.gif'),
+        height: 300,
+        image: NetworkImage(producto.fotourl!),
+        fit: BoxFit.cover,
+      );
+    }
+    return Image(
+      image: AssetImage('assets/no-image.png'),
       height: 300,
       fit: BoxFit.cover,
     );

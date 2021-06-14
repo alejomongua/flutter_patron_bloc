@@ -40,13 +40,20 @@ class HomePage extends StatelessWidget {
               onDismissed: (_) {
                 productProvider.destroy(productos[i].id!);
               },
-              child: ListTile(
-                title: Text(productos[i].titulo!),
-                subtitle: Text(productos[i].precio),
-                onTap: () => Navigator.pushNamed(
-                  context,
-                  'product',
-                  arguments: productos[i],
+              child: Card(
+                child: Column(
+                  children: [
+                    productos[i].fotourl == null
+                        ? Image(
+                            image: AssetImage('assets/no-image.png'),
+                          )
+                        : FadeInImage(
+                            placeholder: AssetImage('assets/jar-loading.gif'),
+                            image: NetworkImage(productos[i].fotourl!),
+                            fit: BoxFit.cover,
+                          ),
+                    _renderTile(productos, i, context),
+                  ],
                 ),
               ),
             ),
@@ -56,6 +63,18 @@ class HomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, 'product'),
         child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  ListTile _renderTile(List<Product> productos, int i, BuildContext context) {
+    return ListTile(
+      title: Text(productos[i].titulo!),
+      subtitle: Text(productos[i].precio),
+      onTap: () => Navigator.pushNamed(
+        context,
+        'product',
+        arguments: productos[i],
       ),
     );
   }
