@@ -3,6 +3,7 @@ import 'package:patron_bloc/blocs/provider.dart';
 import 'package:patron_bloc/pages/home_page.dart';
 import 'package:patron_bloc/pages/login_page.dart';
 import 'package:patron_bloc/pages/product_page.dart';
+import 'package:patron_bloc/pages/register_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,11 +16,12 @@ class MyApp extends StatelessWidget {
     return Provider(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: HomePage(),
+        home: LoginPage(),
         routes: {
           'home': (_) => HomePage(),
           'login': (_) => LoginPage(),
           'product': (_) => ProductPage(),
+          'register': (_) => RegisterPage(),
         },
       ),
     );

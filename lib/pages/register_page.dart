@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:patron_bloc/blocs/provider.dart';
+import 'package:patron_bloc/providers/users_provider.dart';
 
-class LoginPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
+  final UserProvider userProvider = UserProvider();
+
   @override
   Widget build(BuildContext context) {
     final LoginBloc bloc = Provider.of(context);
@@ -179,13 +182,10 @@ class LoginPage extends StatelessWidget {
                               builder: (context, snapshot) {
                                 return ElevatedButton(
                                   onPressed: snapshot.hasData
-                                      ? () => Navigator.pushReplacementNamed(
-                                            context,
-                                            'home',
-                                          )
+                                      ? () => _register(bloc, context)
                                       : null,
                                   child: Container(
-                                    child: Text('Ingresar'),
+                                    child: Text('Register'),
                                     padding: EdgeInsets.symmetric(
                                       vertical: 20,
                                       horizontal: 40,
@@ -197,14 +197,9 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      // To do: recuperar contraseña
-                      onPressed: null,
-                      child: Text('¿Olvidó la contraseña?'),
-                    ),
-                    TextButton(
                       onPressed: () =>
-                          Navigator.pushReplacementNamed(context, 'register'),
-                      child: Text('Regístrese'),
+                          Navigator.pushReplacementNamed(context, 'login'),
+                      child: Text('Cancelar registro'),
                     )
                   ],
                 ),
@@ -214,5 +209,9 @@ class LoginPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _register(LoginBloc bloc, BuildContext context) {
+    userProvider.create(bloc.currentEmail, bloc.currentPassword);
   }
 }

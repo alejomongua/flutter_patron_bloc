@@ -6,7 +6,7 @@ import 'package:patron_bloc/models/product_model.dart';
 import 'package:http/http.dart' as http;
 
 // El archivo secrets es ignorado por git, en él únicamente hay definidas tres
-// constantes: FIREBASE_URL, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET y
+// constantes: FIREBASE_DB_URL, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET y
 // CLOUDINARY_CLOUD_ID
 import 'package:patron_bloc/secrets.dart';
 
@@ -22,7 +22,7 @@ class ProductsProvider {
   Future<bool> create(Product product) async {
     if (product.id != null) return await update(product);
 
-    final url = Uri.parse('$FIREBASE_URL/products.json');
+    final url = Uri.parse('$FIREBASE_DB_URL/products.json');
 
     final response = await http.post(url, body: productToJson(product));
 
@@ -37,7 +37,7 @@ class ProductsProvider {
   Future<bool> update(Product product) async {
     if (product.id == null) return await create(product);
 
-    final url = Uri.parse('$FIREBASE_URL/products/${product.id}.json');
+    final url = Uri.parse('$FIREBASE_DB_URL/products/${product.id}.json');
 
     final productMap = product.toJson();
     productMap.remove('id');
@@ -53,7 +53,7 @@ class ProductsProvider {
   }
 
   Future<List<Product>> index() async {
-    final url = Uri.parse('$FIREBASE_URL/products.json');
+    final url = Uri.parse('$FIREBASE_DB_URL/products.json');
 
     final response = await http.get(url);
 
@@ -76,7 +76,7 @@ class ProductsProvider {
   }
 
   Future<bool> destroy(String id) async {
-    final url = Uri.parse('$FIREBASE_URL/products/$id.json');
+    final url = Uri.parse('$FIREBASE_DB_URL/products/$id.json');
 
     final response = await http.delete(url);
 
