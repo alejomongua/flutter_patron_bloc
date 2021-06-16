@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:patron_bloc/blocs/provider.dart';
+import 'package:patron_bloc/providers/users_provider.dart';
+import 'package:patron_bloc/utils/utils.dart';
 
 class LoginPage extends StatelessWidget {
+  final userProvider = UserProvider();
+
   @override
   Widget build(BuildContext context) {
     final LoginBloc bloc = Provider.of(context);
@@ -179,10 +183,7 @@ class LoginPage extends StatelessWidget {
                               builder: (context, snapshot) {
                                 return ElevatedButton(
                                   onPressed: snapshot.hasData
-                                      ? () => Navigator.pushReplacementNamed(
-                                            context,
-                                            'home',
-                                          )
+                                      ? () => _login(bloc, context)
                                       : null,
                                   child: Container(
                                     child: Text('Ingresar'),
@@ -214,5 +215,17 @@ class LoginPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _login(LoginBloc bloc, BuildContext context) async {
+    final response =
+        await userProvider.login(bloc.currentEmail, bloc.currentPassword);
+
+    if (response['ok']) {
+      Navigator.pushReplacementNamed(context, 'home');
+      return;
+    }
+
+    showAlert(context, response['payload']);
   }
 }

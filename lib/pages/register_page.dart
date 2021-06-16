@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:patron_bloc/blocs/provider.dart';
 import 'package:patron_bloc/providers/users_provider.dart';
+import 'package:patron_bloc/utils/utils.dart';
 
 class RegisterPage extends StatelessWidget {
   final UserProvider userProvider = UserProvider();
@@ -126,7 +127,7 @@ class RegisterPage extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            'Identifíquese',
+                            'Regístrese',
                             style: TextStyle(fontSize: 20),
                           ),
                           // Email
@@ -211,7 +212,15 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
-  _register(LoginBloc bloc, BuildContext context) {
-    userProvider.create(bloc.currentEmail, bloc.currentPassword);
+  _register(LoginBloc bloc, BuildContext context) async {
+    final response =
+        await userProvider.create(bloc.currentEmail, bloc.currentPassword);
+
+    if (response['ok']) {
+      Navigator.pushReplacementNamed(context, 'home');
+      return;
+    }
+
+    showAlert(context, response['payload']);
   }
 }

@@ -4,8 +4,12 @@ import 'package:patron_bloc/pages/home_page.dart';
 import 'package:patron_bloc/pages/login_page.dart';
 import 'package:patron_bloc/pages/product_page.dart';
 import 'package:patron_bloc/pages/register_page.dart';
+import 'package:patron_bloc/utils/user_preferences.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = new UserPreferences();
+  await prefs.initPrefs();
   runApp(MyApp());
 }
 

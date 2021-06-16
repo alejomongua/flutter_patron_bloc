@@ -33,6 +33,7 @@ dependencies:
   intl: ^0.17.0
   image_picker: ^0.8.0+3
   cloudinary_sdk: ^3.0.1+7
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:
