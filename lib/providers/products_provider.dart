@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 // constantes: FIREBASE_DB_URL, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET y
 // CLOUDINARY_CLOUD_ID
 import 'package:patron_bloc/secrets.dart';
+import 'package:patron_bloc/utils/user_preferences.dart';
 
 class ProductsProvider {
   // Las constantes están definidas en el archivo secrets que no se encuentra
@@ -18,15 +19,22 @@ class ProductsProvider {
     CLOUDINARY_API_SECRET,
     CLOUDINARY_CLOUD_ID,
   );
+  final _prefs = UserPreferences();
 
   Future<bool> create(Product product) async {
     if (product.id != null) return await update(product);
 
-    final url = Uri.parse('$FIREBASE_DB_URL/products.json');
+    final url =
+        Uri.parse('$FIREBASE_DB_URL/products.json?auth=${_prefs.token}');
 
     final response = await http.post(url, body: productToJson(product));
 
-    final decodedData = json.decode(response.body);
+    final Map<String, dynamic> decodedData = json.decode(response.body);
+
+    if (decodedData['error'] != null) {
+      _prefs.token = '';
+      return false;
+    }
 
     print("Created");
     print(decodedData);
@@ -37,7 +45,8 @@ class ProductsProvider {
   Future<bool> update(Product product) async {
     if (product.id == null) return await create(product);
 
-    final url = Uri.parse('$FIREBASE_DB_URL/products/${product.id}.json');
+    final url = Uri.parse(
+        '$FIREBASE_DB_URL/products/${product.id}.json?auth=${_prefs.token}');
 
     final productMap = product.toJson();
     productMap.remove('id');
@@ -46,6 +55,11 @@ class ProductsProvider {
 
     final decodedData = json.decode(response.body);
 
+    if (decodedData['error'] != null) {
+      _prefs.token = '';
+      return false;
+    }
+
     print("Updated");
     print(decodedData);
 
@@ -53,13 +67,17 @@ class ProductsProvider {
   }
 
   Future<List<Product>> index() async {
-    final url = Uri.parse('$FIREBASE_DB_URL/products.json');
+    final url =
+        Uri.parse('$FIREBASE_DB_URL/products.json?auth=${_prefs.token}');
 
     final response = await http.get(url);
 
-    final Map<String, dynamic>? decodedData = json.decode(response.body);
+    final Map<String, dynamic> decodedData = json.decode(response.body);
 
-    if (decodedData == null) return [];
+    if (decodedData['error'] != null) {
+      _prefs.token = '';
+      return [];
+    }
 
     final List<Product> resultado = [];
 
@@ -76,16 +94,24 @@ class ProductsProvider {
   }
 
   Future<bool> destroy(String id) async {
-    final url = Uri.parse('$FIREBASE_DB_URL/products/$id.json');
+    final url =
+        Uri.parse('$FIREBASE_DB_URL/products/$id.json?auth=${_prefs.token}');
 
     final response = await http.delete(url);
 
-    final decodedData = json.decode(response.body);
+    final Map<String, dynamic>? decodedData = json.decode(response.body);
 
-    print("Deleted $id");
-    print(decodedData);
+    if (decodedData == null) {
+      print("Deleted $id");
+      print(decodedData);
 
-    return true;
+      return true;
+    }
+
+    if (decodedData['error'] != null) {
+      _prefs.token = '';
+    }
+    return false;
   }
 
   Future<String?> uploadImage(File file) async {

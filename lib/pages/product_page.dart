@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:patron_bloc/blocs/provider.dart';
 import 'package:patron_bloc/models/product_model.dart';
-import 'package:patron_bloc/providers/products_provider.dart';
 import 'package:patron_bloc/utils/utils.dart';
 
 class ProductPage extends StatefulWidget {
@@ -16,12 +16,13 @@ class _ProductPageState extends State<ProductPage> {
   File? foto;
 
   Product producto = Product();
-  ProductsProvider productProvider = ProductsProvider();
 
   bool _guardando = false;
 
   @override
   Widget build(BuildContext context) {
+    final ProductsBloc productosBloc = Provider.productsBloc(context);
+
     final Product? prodData =
         ModalRoute?.of(context)?.settings.arguments as Product?;
 
@@ -55,7 +56,7 @@ class _ProductPageState extends State<ProductPage> {
                 _nombreField(),
                 _precioField(),
                 _crearDisponible(),
-                _crearBoton(context),
+                _crearBoton(context, productosBloc),
               ],
             ),
           ),
@@ -93,8 +94,8 @@ class _ProductPageState extends State<ProductPage> {
         },
       );
 
-  Widget _crearBoton(context) => ElevatedButton(
-        onPressed: _guardando ? null : () => _submit(context),
+  Widget _crearBoton(BuildContext context, ProductsBloc bloc) => ElevatedButton(
+        onPressed: _guardando ? null : () => _submit(context, bloc),
         child: Container(
           width: 100,
           child: Row(
@@ -107,7 +108,7 @@ class _ProductPageState extends State<ProductPage> {
         ),
       );
 
-  _submit(context) async {
+  _submit(BuildContext context, ProductsBloc bloc) async {
     final currentState = formKey.currentState;
     _guardando = true;
     setState(() {});
@@ -116,11 +117,11 @@ class _ProductPageState extends State<ProductPage> {
 
       if (foto != null) {
         print('Si hay imagen');
-        producto.fotourl = await productProvider.uploadImage(foto!);
+        producto.fotourl = await bloc.addPhoto(foto!);
         print(producto.fotourl);
       }
 
-      productProvider.create(producto);
+      bloc.addProduct(producto);
 
       showSnackbar('Datos guardados');
 

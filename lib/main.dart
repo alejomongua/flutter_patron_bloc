@@ -8,7 +8,7 @@ import 'package:patron_bloc/utils/user_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = new UserPreferences();
+  final prefs = UserPreferences();
   await prefs.initPrefs();
   runApp(MyApp());
 }
@@ -17,10 +17,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final _prefs = UserPreferences();
+
     return Provider(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: LoginPage(),
+        home: _prefs.token == '' ? LoginPage() : HomePage(),
         routes: {
           'home': (_) => HomePage(),
           'login': (_) => LoginPage(),
